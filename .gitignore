@@ -14,6 +14,12 @@ yarn-error.log
 # Server
 /server/node_modules
 /server/dist
+/server/package-lock.json
+
+# Client
+/client/node_modules
+/client/dist
+/client/package-lock.json
 
 # IDEs and editors
 .idea/
