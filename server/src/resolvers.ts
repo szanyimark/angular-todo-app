@@ -3,14 +3,15 @@ interface Todo {
   id: string;
   title: string;
   completed: boolean;
+  completedAt: string | null;
   createdAt: string;
 }
 
 // In-memory database for demo app
 let todos: Todo[] = [
-  { id: '1', title: 'Learn Angular', completed: true, createdAt: new Date().toISOString() },
-  { id: '2', title: 'Learn GraphQL', completed: false, createdAt: new Date().toISOString() },
-  { id: '3', title: 'Build Todo App', completed: false, createdAt: new Date().toISOString() },
+  { id: '1', title: 'Learn Angular', completed: true, completedAt: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: '2', title: 'Learn GraphQL', completed: false, completedAt: null, createdAt: new Date().toISOString() },
+  { id: '3', title: 'Build Todo App', completed: false, completedAt: null, createdAt: new Date().toISOString() },
 ];
 
 let idCounter = 4;
@@ -26,6 +27,7 @@ const resolvers = {
         id: String(idCounter++),
         title: input.title,
         completed: false,
+        completedAt: null,
         createdAt: new Date().toISOString(),
       };
       todos.push(newTodo);
@@ -37,7 +39,10 @@ const resolvers = {
       if (!todo) throw new Error('Todo not found');
       
       if (input.title !== undefined) todo.title = input.title;
-      if (input.completed !== undefined) todo.completed = input.completed;
+      if (input.completed !== undefined) {
+        todo.completed = input.completed;
+        todo.completedAt = input.completed ? new Date().toISOString() : null;
+      }
       
       return todo;
     },
@@ -55,6 +60,7 @@ const resolvers = {
       if (!todo) throw new Error('Todo not found');
       
       todo.completed = !todo.completed;
+      todo.completedAt = todo.completed ? new Date().toISOString() : null;
       return todo;
     },
   },

@@ -4,6 +4,7 @@ const typeDefs = `#graphql
     id: ID!
     title: String!
     completed: Boolean!
+    completedAt: String
     createdAt: String!
   }
 
