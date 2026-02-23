@@ -1,0 +1,19 @@
+.container { max-width: 500px; margin: 50px auto; padding: 20px; font-family: Arial, sans-serif; }
+    h1 { text-align: center; color: #333; }
+    
+    .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
+    .add-form input { flex: 1; padding: 10px; font-size: 16px; }
+    .add-form button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    .add-form button:disabled { background: #ccc; }
+    
+    .todo-list { list-style: none; padding: 0; }
+    .todo-list li { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
+    .todo-list li.completed span { text-decoration: line-through; color: #999; }
+    .todo-list input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    .todo-list input[type="text"] { flex: 1; padding: 5px; font-size: 14px; }
+    .todo-list span { flex: 1; cursor: pointer; }
+    .delete-btn { background: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+    
+    .stats { display: flex; justify-content: space-around; margin-top: 20px; color: #666; }
+    .loading { color: #2196F3; }
+    .error { color: #f44336; }

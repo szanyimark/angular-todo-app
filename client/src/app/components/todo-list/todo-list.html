@@ -1,0 +1,58 @@
+<div class="container"> 
+    <form (ngSubmit)="addTodo()" class="add-form">
+        <input 
+            type="text" 
+            [(ngModel)]="newTodoTitle" 
+            name="title"
+            placeholder="What needs to be done?"
+            required
+        >
+        <button type="submit" [disabled]="!newTodoTitle.trim()">Add</button>
+    </form>
+
+    <!-- Loading -->
+    @if(todoService.loading()) {
+        <p class="loading">Loading...</p>
+    }
+    
+    <!-- Error -->
+    @else if(todoService.error()) {
+        <p class="error">{{ todoService.error() }}</p>
+    }
+
+    <!-- Todo List -->
+    <ul class="todo-list">
+        @for(todo of todoService.todos(); track todo.id) {
+            <li [class.completed]="todo.completed">
+                <input 
+                    type="checkbox" 
+                    [checked]="todo.completed"
+                    (change)="toggleTodo(todo.id)"
+                >
+                
+                @if (editingId() !== todo.id) {
+                    <span (dblclick)="startEdit(todo)"> {{ todo.title }} </span>
+                } @else {
+                    <input 
+                        type="text"
+                        [value]="todo.title"
+                        (blur)="saveEdit(todo.id, $event)"
+                        (keyup.enter)="saveEdit(todo.id, $event)"
+                        (keyup.escape)="cancelEdit()"
+                        autofocus
+                    >
+                }
+                <button class="delete-btn" (click)="deleteTodo(todo.id)">✕</button>
+            </li>
+        } @empty {
+            <p class="empty">No todos to display!</p>
+        }
+    </ul>
+
+      <!-- Stats -->
+    <div class="stats">
+        <span>Total: {{ todoService.todos().length }}</span>
+        <span>Completed: {{ completedCount() }}</span>
+        <span>Pending: {{ todoService.todos().length - completedCount() }}</span>
+    </div>
+</div>
