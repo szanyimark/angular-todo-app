@@ -1,59 +1,151 @@
-# AngularDemo
+# Angular Todo App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+A full-stack todo application with Angular frontend, GraphQL server, and PostgreSQL database.
 
-## Development server
+## Tech Stack
 
-To start a local development server, run:
+- **Frontend**: Angular 21 with Apollo Client
+- **Backend**: Apollo Server with GraphQL
+- **Database**: PostgreSQL with Drizzle ORM
+- **Containerization**: Docker & Docker Compose
 
-```bash
-ng serve
-```
+## Quick Start
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Prerequisites
 
-## Code scaffolding
+- Docker and Docker Compose
+- Node.js 20+ (for local development without Docker)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Running with Docker
 
 ```bash
-ng generate --help
+docker-compose up --build
 ```
 
-## Building
-
-To build the project run:
+Or run in detached mode:
 
 ```bash
-ng build
+docker-compose up --build -d
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Services will be available at:
+- **Client**: http://localhost:4200
+- **Server**: http://localhost:4000
+- **PostgreSQL**: localhost:5432
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Running Locally
 
 ```bash
-ng test
+# Start PostgreSQL with Docker
+docker-compose up postgres
+
+# Install dependencies
+cd server && npm install
+cd client && npm install
+
+# Start server (with hot reload)
+cd server && npm start
+
+# Start client (in another terminal)
+cd client && ng serve
 ```
 
-## Running end-to-end tests
+## Project Structure
 
-For end-to-end (e2e) testing, run:
+```
+├── client/                 # Angular frontend
+│   ├── src/
+│   │   └── app/
+│   │       ├── components/ # Angular components
+│   │       ├── services/   # Apollo Client services
+│   │       ├── graphql/    # GraphQL queries & mutations
+│   │       └── models/     # TypeScript interfaces
+│   ├── angular.json        # Angular configuration
+│   └── package.json
+│
+├── server/                 # GraphQL server
+│   ├── src/
+│   │   ├── db/
+│   │   │   ├── schema.ts   # Drizzle schema
+│   │   │   └── index.ts    # Database connection
+│   │   ├── resolvers.ts    # GraphQL resolvers
+│   │   └── schema.ts       # GraphQL type definitions
+│   ├── drizzle.config.ts   # Drizzle configuration
+│   ├── nodemon.json        # Hot reload configuration
+│   └── package.json
+│
+├── docker-compose.yml      # Docker services configuration
+└── README.md
+```
+
+## Database Schema
+
+The `todos` table has the following fields:
+- `id` (UUID) - Primary key
+- `title` (text) - Todo title
+- `completed` (boolean) - Completion status
+- `completedAt` (timestamp) - When the todo was completed
+- `createdAt` (timestamp) - Creation timestamp
+- `updatedAt` (timestamp) - Last update timestamp
+
+## Todo Ordering
+
+Todos are ordered as follows:
+1. Uncompleted todos first (by createdAt ascending)
+2. Completed todos last (by completedAt descending)
+
+## Hot Reload
+
+Both frontend and backend support hot reload in Docker:
+
+- **Server**: Uses nodemon with polling - changes to `server/src` auto-restart
+- **Client**: Uses Angular's dev server with polling - changes to `client/src` auto-rebuild
+
+The polling configuration is set in:
+- `server/nodemon.json` - Server file watching
+- `client/angular.json` - Client file watching (poll: 2000ms)
+
+To rebuild after configuration changes:
 
 ```bash
-ng e2e
+docker-compose down && docker-compose up --build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Available Scripts
 
-## Additional Resources
+### Server
+```bash
+cd server
+npm start              # Start with hot reload (nodemon)
+npx drizzle-kit push   # Push schema changes to database
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Client
+```bash
+cd client
+ng serve               # Start development server
+ng build               # Build for production
+```
+
+## Environment Variables
+
+Create a `.env` file in the `server` directory:
+
+```env
+DATABASE_URL=postgresql://todouser:todopass@localhost:5432/tododb
+```
+
+## Docker Services
+
+| Service   | Port | Description          |
+|-----------|------|----------------------|
+| client    | 4200 | Angular dev server   |
+| server    | 4000 | GraphQL Apollo Server|
+| postgres  | 5432 | PostgreSQL database  |
+
+## Database Credentials
+
+The default database credentials (configured in docker-compose.yml):
+- **User**: todouser
+- **Password**: todopass
+- **Database**: tododb
