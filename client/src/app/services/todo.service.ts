@@ -43,7 +43,8 @@ export class TodoService {
   createTodo(title: string) {
     this.apollo.mutate<{ createTodo: Todo }>({
       mutation: CREATE_TODO,
-      variables: { title },
+      variables: { input: { title } },
+      refetchQueries: [{ query: GET_TODOS }]
     }).pipe(
       map(result => result.data?.createTodo)
     ).subscribe(newTodo => {
@@ -62,6 +63,7 @@ export class TodoService {
     this.apollo.mutate<{ toggleTodo: Todo }>({
       mutation: TOGGLE_TODO,
       variables: { id },
+      refetchQueries: [{ query: GET_TODOS }]
     }).subscribe({
       error: () => {
         // Rollback on error
@@ -76,6 +78,7 @@ export class TodoService {
     this.apollo.mutate<{ deleteTodo: boolean }>({
       mutation: DELETE_TODO,
       variables: { id },
+      refetchQueries: [{ query: GET_TODOS }]
     }).subscribe(result => {
       if (result.data?.deleteTodo) {
         this.todos.update(todos => todos.filter(t => t.id !== id));
@@ -93,7 +96,8 @@ export class TodoService {
 
     this.apollo.mutate<{ updateTodo: Todo }>({
       mutation: UPDATE_TODO,
-      variables: { id, title },
+      variables: { input: { id, title } },
+      refetchQueries: [{ query: GET_TODOS }]
     }).subscribe({
       error: () => {
         // Rollback on error
