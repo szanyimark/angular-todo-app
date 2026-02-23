@@ -1,6 +1,16 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: todo-postgres
+    environment:
+      POSTGRES_USER: todouser
+      POSTGRES_PASSWORD: todopass
+      POSTGRES_DB: tododb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   server:
     build:
       context: ./server
@@ -9,6 +19,9 @@ services:
       - "4000:4000"
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgresql://todouser:todopass@postgres:5432/tododb
+    depends_on:
+      - postgres
 
   client:
     build:
@@ -20,3 +33,6 @@ services:
       - NODE_ENV=development
     depends_on:
       - server
+
+volumes:
+  postgres_data:
