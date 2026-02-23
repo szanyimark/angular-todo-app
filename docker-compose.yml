@@ -20,6 +20,9 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://todouser:todopass@postgres:5432/tododb
+    volumes:
+      - ./server/src:/app/src
+      - /app/node_modules
     depends_on:
       - postgres
 
