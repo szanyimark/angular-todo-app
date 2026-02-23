@@ -1,67 +1,63 @@
 // server/src/resolvers.ts
-interface Todo {
-  id: string;
-  title: string;
-  completed: boolean;
-  completedAt: string | null;
-  createdAt: string;
-}
-
-// In-memory database for demo app
-let todos: Todo[] = [
-  { id: '1', title: 'Learn Angular', completed: true, completedAt: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: '2', title: 'Learn GraphQL', completed: false, completedAt: null, createdAt: new Date().toISOString() },
-  { id: '3', title: 'Build Todo App', completed: false, completedAt: null, createdAt: new Date().toISOString() },
-];
-
-let idCounter = 4;
+import { db } from './db';
+import { todos } from './db/schema';
+import { eq, asc, desc } from 'drizzle-orm';
 
 const resolvers = {
   Query: {
-    todos: () => todos,
+    todos: async () => {
+      return await db.select().from(todos).orderBy(
+        asc(todos.completed),
+        desc(todos.completedAt),
+        asc(todos.createdAt),
+      );
+    },
   },
 
   Mutation: {
-    createTodo: (_: any, { input }: { input: { title: string } }) => {
-      const newTodo: Todo = {
-        id: String(idCounter++),
+    createTodo: async (_: any, { input }: { input: { title: string } }) => {
+      const [newTodo] = await db.insert(todos).values({
         title: input.title,
         completed: false,
-        completedAt: null,
-        createdAt: new Date().toISOString(),
-      };
-      todos.push(newTodo);
+      }).returning();
       return newTodo;
     },
 
-    updateTodo: (_: any, { input }: { input: { id: string; title?: string; completed?: boolean } }) => {
-      const todo = todos.find(t => t.id === input.id);
-      if (!todo) throw new Error('Todo not found');
-      
-      if (input.title !== undefined) todo.title = input.title;
+    updateTodo: async (_: any, { input }: { input: { id: string; title?: string; completed?: boolean } }) => {
+      const updateData: any = { updatedAt: new Date() };
+      if (input.title !== undefined) updateData.title = input.title;
       if (input.completed !== undefined) {
-        todo.completed = input.completed;
-        todo.completedAt = input.completed ? new Date().toISOString() : null;
+        updateData.completed = input.completed;
+        updateData.completedAt = input.completed ? new Date() : null;
       }
-      
-      return todo;
+
+      const [updatedTodo] = await db.update(todos)
+        .set(updateData)
+        .where(eq(todos.id, input.id))
+        .returning();
+      return updatedTodo;
     },
 
-    deleteTodo: (_: any, { id }: { id: string }) => {
-      const index = todos.findIndex(t => t.id === id);
-      if (index === -1) return false;
-      
-      todos.splice(index, 1);
+    deleteTodo: async (_: any, { id }: { id: string }) => {
+      await db.delete(todos).where(eq(todos.id, id));
       return true;
     },
 
-    toggleTodo: (_: any, { id }: { id: string }) => {
-      const todo = todos.find(t => t.id === id);
-      if (!todo) throw new Error('Todo not found');
+    toggleTodo: async (_: any, { id }: { id: string }) => {
+      const [currentTodo] = await db.select().from(todos).where(eq(todos.id, id));
+      if (!currentTodo) throw new Error('Todo not found');
+
+      const newCompleted = !currentTodo.completed;
+      const [updatedTodo] = await db.update(todos)
+        .set({
+          completed: newCompleted,
+          completedAt: newCompleted ? new Date() : null,
+          updatedAt: new Date()
+        })
+        .where(eq(todos.id, id))
+        .returning();
       
-      todo.completed = !todo.completed;
-      todo.completedAt = todo.completed ? new Date().toISOString() : null;
-      return todo;
+      return updatedTodo;
     },
   },
 };
