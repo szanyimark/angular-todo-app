@@ -10,6 +10,13 @@
         <button type="submit" [disabled]="!newTodoTitle.trim()">Add</button>
     </form>
 
+    <!-- Stats -->
+    <div class="stats">
+        <span>Total: {{ todoService.todos().length }}</span>
+        <span>Completed: {{ completedCount() }}</span>
+        <span>Pending: {{ todoService.todos().length - completedCount() }}</span>
+    </div>
+
     <!-- Loading -->
     @if(todoService.loading()) {
         <p class="loading">Loading...</p>
@@ -48,11 +55,4 @@
             <p class="empty">No todos to display!</p>
         }
     </ul>
-
-      <!-- Stats -->
-    <div class="stats">
-        <span>Total: {{ todoService.todos().length }}</span>
-        <span>Completed: {{ completedCount() }}</span>
-        <span>Pending: {{ todoService.todos().length - completedCount() }}</span>
-    </div>
 </div>
